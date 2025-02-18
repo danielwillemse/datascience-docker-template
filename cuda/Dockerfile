@@ -1,5 +1,4 @@
 FROM quay.io/jupyter/pytorch-notebook:cuda12-python-3.11.8
-# FROM quay.io/jupyter/pytorch-notebook
 
 COPY --chown=${NB_UID}:${NB_GID} requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt

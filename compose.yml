@@ -1,24 +1,22 @@
 services:
-  notebooks: 
-    build: ./Dockerfile
+  notebooks_cuda:
+    build: ./cuda
     depends_on: 
       - postgres
-    container_name: notebooks
+    container_name: notebooks_cuda
     environment:
+
       CUDA_LAUNCH_BLOCKING: 1
-      JUPYTER_TOKEN: xx
     network_mode: host
     volumes:
       - ../notebooks:/home/jovyan/
-  
-  notebooks_cuda:
-    build: ./Dockerfile.cuda
     deploy:
       resources:
         reservations:
           devices:
-          - driver: nvidia
-            capabilities: [gpu]
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, utility, compute]
 
   postgres:
     image: pgvector/pgvector:pg17
