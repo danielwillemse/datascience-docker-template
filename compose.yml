@@ -1,11 +1,11 @@
 services:
   notebooks_cuda:
     build: ./cuda
-    depends_on: 
+    depends_on:
       - postgres
     container_name: notebooks_cuda
     environment:
-
+      JUPYTER_TOKEN: xx
       CUDA_LAUNCH_BLOCKING: 1
     network_mode: host
     volumes:
@@ -16,7 +16,7 @@ services:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu, utility, compute]
+              capabilities: [gpu]
 
   postgres:
     image: pgvector/pgvector:pg17
@@ -28,6 +28,45 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    network_mode: host
 
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    volumes:
+      - ollama:/root/.ollama
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    volumes:
+      - open-webui:/app/backend/data
+    depends_on:
+      - ollama
+    environment:
+      - "OLLAMA_BASE_URL=http://ollama:11434"
+      - "WEBUI_SECRET_KEY="
+    network_mode: host
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    network_mode: host
+
+  chroma:
+    image: chromadb/chroma
+    container_name: chromadb
+    network_mode: host
+    volumes:
+      - chroma:/chroma/chroma
 volumes:
   pgdata:
+  ollama:
+  chroma:
+  open-webui:
